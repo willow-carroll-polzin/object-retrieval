@@ -2,8 +2,8 @@
 ## Room Recognition
 ### Team Members
 Max Polzin
-Keyanna Coghlan //
-Sami Nassif-Lachapelle \\
+Keyanna Coghlan  
+Sami Nassif-Lachapelle  
 
 ### Overview
 This project uses ?????
