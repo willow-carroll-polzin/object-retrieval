@@ -1,7 +1,7 @@
 # ITEC 5920: DESIGN PROJECT
 ## Room Recognition
 ### Team Members
-Max Polzin
+Max Polzin  
 Keyanna Coghlan  
 Sami Nassif-Lachapelle  
 
