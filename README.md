@@ -1,4 +1,4 @@
-# ITEC 5920: DESIGN PROJECT
+# SYSC 5906: DIRECTED STUDY
 ## Room Recognition
 ### Team Members
 Max Polzin  
