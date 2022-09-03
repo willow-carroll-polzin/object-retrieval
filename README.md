@@ -6,7 +6,17 @@ Keyanna Coghlan
 Sami Nassif-Lachapelle  
 
 ### Overview
-This project uses ?????
+This project uses deep learning models to generate semantically labelled maps of indoor spaces. 
+
+The system consists of three main components:
+1. A object detector using version of YOLACT trained on the MIT Indoor Scenes Dataset (2019)
+2. A custom "room detector" that takes in detected objects and their position and infers the room label
+3. A custom path planner/obstacle avoidance system that generates a metric map of the environment and learns to avoid walls and obstacles
+4. Finally the output of the path planner and obstacle avoidance are combined to generate a semantically labelled map of the environment
+![alt text](https://github.com/MaxPolzinCU/room-recognition/images/systemOverview.png?raw=true)
+
+
+FINISH UPDATING THE REST OF THE README:
 
 ## Setup and Usage:
 ### Setting up the Environment and Dependencies
