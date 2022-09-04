@@ -32,7 +32,7 @@ from sklearn.model_selection import train_test_split
 
 from room_detection.room_detection import roomGuesser, roomDetector
 from object_detection.object_detection import objectDetector
-from vision_system.vision_system import grabFrame, cameraSetup
+from object_detection.vision_system import cameraSetup, openPoses
 
 #Import dataset
 pickledData = open(PICKLE_DIRECTORY+"listOfAllObj_v3.pkl","rb")
@@ -45,13 +45,11 @@ uniqueObjs = pickle.load(pickledObjs)
 uniqueObjs = dataSet.columns[0:-1]
 pickledObjs.close()
 
-#Load models
-model_1_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
-model_2_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
+#Load custom models
+model_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
 
 #Summarize models
-model_1_OD.summary()
-model_2_RD.summary()
+model_RD.summary()
 
 ####################################
 # OFFLINE VERSION
@@ -65,7 +63,7 @@ model_2_RD.summary()
 targetObj = input('Enter the desired object: ')
 
 #Search for singular objects in the current input and return top results
-result, n = roomGuesser(targetObj, uniqueObjs, model_2_RD)
+result, n = roomGuesser(targetObj, uniqueObjs, model_RD)
 
 #Check if result is valid
 if n == 0:
@@ -80,47 +78,48 @@ if n == 0:
 # plan path from current pose
 
 ########
-# SETUP VIDEO:
+# ACCESS PRE-RECORDED DATA (VIDEO+POSES):
 ########
 OFFLINE = True
-cameraSetup(OFFLINE)
+frames = cameraSetup(OFFLINE)
+poses = openPoses()
 
 ########
 # MAIN LOOP:
 ########
 targetObjStatus = False
 haveFrames = True
-while(not(targetObjStatus) and haveFrames):
-    ########
-    # ACCESS VIDEO:
-    ########
-    currentFrame, currentPose, haveFrames = grabFrame()
-
-    ########
-    # OBJECT DETECTION:
-    ########
-    #Detect objects in current frame
-    detectedObjects, cameraPose = objectDetector(model_1_OD, currentFrame)
-
-    ########
-    # TARGET CHECK:
-    ########
-    if targetObj in detectedObjects:
-        targetObjStatus = True
-        print(f'The {targetObj} has been found!' )
+while(not(targetObjStatus)):
+    #Check if target was found in the last analysed frame
+    if targetObjStatus:
         break
-    else:
-        print('Still searching for target object')
 
-    ########
-    # ROOM DETECTION:
-    ########
-    #Label rooms based on currently detected objects
-    detectedRooms, = roomDetector(detectedObjects,model_2_RD)
+    for currentFrame in frames:
+        ########
+        # OBJECT DETECTION:
+        ########
+        #Detect objects in current frame
+        detectedObjects, cameraPose = objectDetector(currentFrame)
 
-    ########
-    # PATH PLANNING:
-    ########
-    # confirm current room matches map (detectedRooms + currentPose + labeledMapFile)
-    # update local path
-    # if path end has been reached, throw err msg
+        ########
+        # TARGET CHECK:
+        ########
+        if targetObj in detectedObjects:
+            targetObjStatus = True
+            print(f'The {targetObj} has been found!' )
+            break
+        else:
+            print('Still searching for target object')
+
+        ########
+        # ROOM DETECTION:
+        ########
+        #Label rooms based on currently detected objects
+        detectedRooms, = roomDetector(detectedObjects,model_2_RD)
+
+        ########
+        # PATH PLANNING:
+        ########
+        # confirm current room matches map (detectedRooms + currentPose + labeledMapFile)
+        # update local path
+        # if path end has been reached, throw err msg

@@ -30,22 +30,20 @@ import numpy as np
 import tensorflow_datasets as tfds
 import keras.api._v2.keras as keras
 import pyrealsense2 as rs
-import math as m
+import math as m'
 from keras.models import load_model
 from sklearn.model_selection import train_test_split
 
 from room_detection.room_detection import roomDetector
 from object_detection.object_detection import objectDetector
-from map_generation.map_generation import extractAndLabelPoses, filterPoses
-from vision_system.vision_system import grabFrame, cameraSetup
+from object_detection.vision_system import cameraSetup, openPoses
+from map_generation.map_generation import extractAndLabelPoses, filterPath
 
-#Load models
-model_1_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
-model_2_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
+#Load custom models
+model_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
 
 #Summarize models
-model_1_OD.summary()
-model_2_RD.summary()
+model_RD.summary()
 
 ####################################
 # OFFLINE VERSION
@@ -53,32 +51,27 @@ model_2_RD.summary()
 # pre-recorded map and video file.
 ####################################
 ########
-# SETUP VIDEO:
+# ACCESS PRE-RECORDED DATA (VIDEO+POSES):
 ########
 OFFLINE = True
-cameraSetup(OFFLINE)
+frames = cameraSetup(OFFLINE)
+poses = openPoses()
 
 ########
 # MAIN LOOP:
 ########
-haveFrames = True
-while (haveFrames):
-    ########
-    # ACCESS VIDEO:
-    ########
-    currentFrame, currentPose, haveFrames = grabFrame()
-
+for currentFrame in frames:
     ########
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    detectedObjects, cameraPose = objectDetector(model_1_OD, currentFrame)
+    detectedObjects, cameraPose = objectDetector(currentFrame)
 
     ########
     # ROOM DETECTION:
     ########
     #Label rooms based on currently detected objects
-    detectedRooms = roomDetector(detectedObjects,model_2_RD)
+    detectedRooms = roomDetector(detectedObjects,model_RD)
 
     ########
     # MAPPING:
@@ -86,7 +79,7 @@ while (haveFrames):
     #Parse the pose data and append room labels to each pose.
     #Each pose corresponds to a singular frame, and therefore
     #A singular room label
-    labeledPath = extractAndLabelPoses(detectedRooms)
+    labeledPath = extractAndLabelPoses(detectedRooms, poses)
 
     #Apply a low-pass filter to the list which contains the
     #labelled path to determine the aproximate centroid of each room
