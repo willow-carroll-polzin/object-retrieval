@@ -1,14 +1,16 @@
 '''
 SYSC 5906:
-Object Retrieval System - V1.0
+Semantic Mapping System - V1.0
 ---
-This system peforms a object retrieval task inside a known semantically mapped indoor space.
+This system performs semantic mapping tasks of a indoor space.
 
 The main components of the system are:
-1.   Guessing the most likely room(s) that a object will be located in
-2.   Path planning to the likely room(s)
-3.   Searching of the space untill the desired object is detected
+1.   Metric map generation using RGBD data
+2.   Object detection performed on live feed from RGB data
+3.   Room detection based on object labels from object detection
+4.   Labelling of the metric map with room labels
 '''
+
 ########
 # SETUP:
 ########
@@ -27,11 +29,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow_datasets as tfds
 import keras.api._v2.keras as keras
+import pyrealsense2 as rs
+import math as m
 from keras.models import load_model
 from sklearn.model_selection import train_test_split
 
 from room_detection.room_detection import roomGuesser, roomDetector
 from object_detection import objectDetector
+from map_generation import label_map
 
 #Import dataset
 pickledData = open(PICKLE_DIRECTORY+"listOfAllObj_v3.pkl","rb")
@@ -99,3 +104,8 @@ while(targetObjStatus == False):
     ########
     # PATH PLANNING:
     ########
+
+
+
+
+
