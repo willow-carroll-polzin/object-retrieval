@@ -3,28 +3,13 @@ import pandas as pd
 import math as m
 import glob
 from PIL import image
-
-
-def openImages():
-    image_list = []
-    for file in glob.glob('dataset/iamges/*.jpg'):
-        image = Image.open(file)
-        image_list.appen(image)
-    return image_list
-
-def openPoses():
-    posesDF = pd.read_csv('dataset/iamges/*.csv')
-    print(df.head())
-    return posesDF
+from support_scripts.offline_support import openImage, openPoses
 
 def cameraSetup(OFFLINE):
     if OFFLINE:
-        return openImages()
+        return openImage(), openPath()
     else:
-        print("ONLINE MODE - TURN RS CAMS ON")
-
-
-
+        print("ONLINE MODE - TURN RS-CAMS ON")
 
 # pipe_pose = rs.pipeline()
 # cfg_pose = rs.config()
