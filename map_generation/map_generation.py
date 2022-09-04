@@ -1,5 +1,4 @@
-def label_map(rooms, path):
-
+def filterPath(rooms, path):
   # Size of window filter
   window_size = 10
 
@@ -14,7 +13,6 @@ def label_map(rooms, path):
     room_pos.update({room: []})
 
   for pose in path:
-
     # Setup a dictionnary to keep track of the occurance of each room within the filter
     room_occ = {}
 
@@ -39,7 +37,6 @@ def label_map(rooms, path):
 
       # Scan over every room. Used to compare each individual pose to the known rooms
       for room in rooms:
-
         # Current room is the same as in the pose
         if (room == path[path_idx + i][2]):
           # Increment the counter in the dicitionnary for that specific room
