@@ -16,7 +16,7 @@ The main components of the system are:
 NN1_OD_DIRECTORY = '/weights/object_detector/'   #Object detector
 NN2_RD_DIRECTORY = '/weights/room_classifier/' #Room detector/guessor
 TEST_DATASET = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/datasets/mit_indoors/processed/data_labelsOnly/'
-PICKLE_DIRECTORY = '/models/trained_data/data_labelsOnly/'
+RD_TRAINED_DATA_DIRECTORY = '/models/trained_data/data_labelsOnly/'
 
 #Import libraries and scripts
 import tensorflow as tf
@@ -36,12 +36,12 @@ from object_detection.vision_system import cameraSetup
 from path_planner.path_planner import path_planner
 
 #Import dataset
-pickledData = open(PICKLE_DIRECTORY+"listOfAllObj_v3.pkl","rb")
+pickledData = open(RD_TRAINED_DATA_DIRECTORY+"listOfAllObj_v3.pkl","rb")
 dataSet = pickle.load(pickledData)
 pickledData.close()
 
 #Import list of unqiue objects from training dataset
-pickledObjs = open(PICKLE_DIRECTORY+"uniqueObjs_v3.pkl","rb")
+pickledObjs = open(RD_TRAINED_DATA_DIRECTORY+"uniqueObjs_v3.pkl","rb")
 uniqueObjs = pickle.load(pickledObjs)
 uniqueObjs = dataSet.columns[0:-1]
 pickledObjs.close()
@@ -121,10 +121,6 @@ while(not(targetObjStatus)):
         ########
         # PATH PLANNING:
         ########
-        # confirm current room matches map (detectedRooms + currentPose + labeledMapFile)
-        # update local path
-        # if path end has been reached, throw err msg
-
         #Load in pre-recorded map
         currentMap = grab_map()
 

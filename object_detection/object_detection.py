@@ -6,7 +6,7 @@ import tensorflow as tf
 This method uses YOLACT trained on the COCO dataset to detect objects
 from RGB camera frames.
 """
-def objectDetector(image, model):
+def objectDetector(frames):
     #Run YOLACT and save detections as a PKL
 
     return

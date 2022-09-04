@@ -15,8 +15,7 @@ The main components of the system are:
 # SETUP:
 ########
 #Directories with model weights and datasets
-NN1_OD_DIRECTORY = '/weights/object_detector/'   #Object detector
-NN2_RD_DIRECTORY = '/weights/room_classifier/' #Room detector/guessor
+NN_RD_DIRECTORY = '/weights/room_classifier/' #Room detector/guessor
 TEST_DATASET = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/datasets/mit_indoors/processed/data_labelsOnly/'
 PICKLE_DIRECTORY = '/models/trained_data/data_labelsOnly/'
 DETECTED_OBJS_DIRECTORY = '/dataset/detectedObjs'
@@ -41,11 +40,9 @@ from object_detection.vision_system import cameraSetup
 from map_generation.map_generation import labelPath, roomLocalizer
 
 #Load custom models
-model_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
 model_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
 
 #Summarize models
-model_OD.summary()
 model_RD.summary()
 
 ####################################
@@ -58,7 +55,7 @@ model_RD.summary()
 ########
 OFFLINE = True
 frames, path = cameraSetup(OFFLINE)
-
+ 
 ########
 # MAIN LOOP:
 ########
@@ -67,7 +64,7 @@ for currentFrame in frames:
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    objectDetector(currentFrame, model_OD)
+    objectDetector(frames, DETECTED_OBJS_DIRECTORY)
     
     #Get detected objects from PKL file
     pickledObjs = open(DETECTED_OBJS_DIRECTORY+"detectedObjs.pkl","rb")
@@ -94,4 +91,3 @@ for currentFrame in frames:
 
     #Save rooms as data??
 
-    
