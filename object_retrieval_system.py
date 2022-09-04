@@ -36,9 +36,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow_datasets as tfds
 import keras.api._v2.keras as keras
-from room_detection import roomGuesser
 from keras.models import load_model
 from sklearn.model_selection import train_test_split
+
+from room_detection import roomGuesser, roomDetector
+from object_detection import objectDetector
+
+#Import dataset
+pickledData = open(PICKLE_DIRECTORY+"listOfAllObj_v3.pkl","rb")
+dataSet = pickle.load(pickledData)
+pickledData.close()
+
+#Import list of unqiue objects from training dataset
+pickledObjs = open(PICKLE_DIRECTORY+"uniqueObjs_v3.pkl","rb")
+uniqueObjs = pickle.load(pickledObjs)
+uniqueObjs = dataSet.columns[0:-1]
+pickledObjs.close()
 
 #Load models
 model_1_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
@@ -49,17 +62,49 @@ model_1_OD.summary()
 model_2_RD.summary()
 
 ########
-# OBJECT DETECTION:
+# MAIN LOOP:
 ########
+#Get a desired object from the user
+targetObj = input('Enter the desired object: ')
+#print(f'You entered - {targetObj}')
 
-########
-# ROOM DETECTION:
-########
+targetObjStatus = False
+while(targetObjStatus == False):
+    ########
+    # OBJECT DETECTION:
+    ########
+    #Detect objects in current frame
+    detectedObjects, cameraPose = objectDetector(model_1_OD)
 
-########
-# ROOM GUESSING:
-########
+    ########
+    # TARGET CHECK:
+    ########
+    if targetObj in detectedObjects:
+        targetObjStatus = True
+        print(f'The {targetObj} has been found!' )
+        break
+    else:
+        print('Still searching for target object')
 
-########
-# PATH PLANNING:
-########
+    ########
+    # ROOM DETECTION:
+    ########
+    #Label rooms based on currently detected objects
+    detectedRooms, = roomDetector(detectedObjects,model_2_RD)
+
+    ########
+    # ROOM GUESSING:
+    ########
+    #Search for singular objects in the current input and return top results
+    result, n = roomGuesser(targetObj, uniqueObjs, model_2_RD)
+
+    #Check if result is valid
+    if n == 0:
+        print(result[0])
+        #Get a new desired object from the user
+        targetObj = input('Enter a valid desired object: ')
+        break
+
+    ########
+    # PATH PLANNING:
+    ########
