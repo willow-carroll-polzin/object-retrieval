@@ -23,20 +23,40 @@ def labelPath(num_poses, num_pics):
               z = -float(quat_roty)
               yaw   =  m.atan2(2.0 * (w*z + x*y), w*w + x*x - y*y - z*z) * 180.0 / m.pi;
 
-              #Append current pose to path (all poses) and add in the current room for that pose
+              # Append current pose to path (all poses) and add in the current room for that pose
               path.append([x,y]) # ADD ROOM
 
               line_count += 1
 
+    # Filter the data so that the number of images is equal to the number of poses.
+    # This is done with an averaging window of size num_poses/num_pics that moves across the data in steps of num_poses/num_pics
+
+    # Decalre the window size
     window_size = int(num_poses/num_pics)
+
+    # Position of the start of the window
     window_idx = 0
+
+    # The filtered path
     filt_path = []
+
+    # The window will move num_pics amount of times, therefore generating num_pics amount of poses
     for i in range(num_pics):
-      for j in window_size:
+
+      # Running sums of coordinates to be averaged over the window
+      tot_x = 0
+      tot_y = 0
+
+      # Increase the running sum by each point in the window
+      for j in range(window_size):
         tot_x = tot_x + path[j+window_idx][0]
         tot_y = tot_y + path[j+window_idx][1]
-      filt_path[i].append(tot_x/window_size, tot_y/window_size)
-      window_idx = window_index + window_size
+
+      # Average the points in the window and append them to the filtere path
+      filt_path.append([tot_x/window_size, tot_y/window_size])
+
+      # Step the window over to the next set of data
+      window_idx = window_idx + window_size
     return filt_path
 
 def filterPath(rooms, path):
