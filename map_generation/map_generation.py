@@ -1,7 +1,7 @@
 import csv
 import math as m
 
-def labelPath():
+def labelPath(num_poses, num_pics):
     path = []
     with open('/content/drive/MyDrive/Colab Notebooks/data.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
@@ -15,21 +15,29 @@ def labelPath():
               quat_roty = row[9]
               quat_rotz = row[10]
               quat_rotw = row[11]
-    
+
               #Convert quaternions from current pose to euler format
               w = float(quat_rotw)
               x = -float(quat_rotz)
               y = float(quat_rotx)
               z = -float(quat_roty)
               yaw   =  m.atan2(2.0 * (w*z + x*y), w*w + x*x - y*y - z*z) * 180.0 / m.pi;
-    
+
               #Append current pose to path (all poses) and add in the current room for that pose
               path.append([x,y]) # ADD ROOM
 
               line_count += 1
-              
-    return path
 
+    window_size = int(num_poses/num_pics)
+    window_idx = 0
+    filt_path = []
+    for i in range(num_pics):
+      for j in window_size:
+        tot_x = tot_x + path[j+window_idx][0]
+        tot_y = tot_y + path[j+window_idx][1]
+      filt_path[i].append(tot_x/window_size, tot_y/window_size)
+      window_idx = window_index + window_size
+    return filt_path
 
 def filterPath(rooms, path):
   # Size of window filter
