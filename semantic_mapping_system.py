@@ -37,7 +37,7 @@ from sklearn.model_selection import train_test_split
 from room_detection.room_detection import roomDetector
 from object_detection.object_detection import objectDetector
 from object_detection.vision_system import cameraSetup, openPoses
-from map_generation.map_generation import extractAndLabelPoses, filterPath
+from map_generation.map_generation import labelPath, filterPath
 
 #Load custom models
 model_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
@@ -65,7 +65,7 @@ for currentFrame in frames:
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    detectedObjects, cameraPose = objectDetector(currentFrame)
+    detectedObjects = objectDetector(currentFrame)
 
     ########
     # ROOM DETECTION:
@@ -79,7 +79,7 @@ for currentFrame in frames:
     #Parse the pose data and append room labels to each pose.
     #Each pose corresponds to a singular frame, and therefore
     #A singular room label
-    labeledPath = extractAndLabelPoses(detectedRooms, poses)
+    labeledPath = labelPath(detectedRooms, poses)
 
     #Apply a low-pass filter to the list which contains the
     #labelled path to determine the aproximate centroid of each room
