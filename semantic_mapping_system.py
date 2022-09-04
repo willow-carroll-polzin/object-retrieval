@@ -30,7 +30,7 @@ import numpy as np
 import tensorflow_datasets as tfds
 import keras.api._v2.keras as keras
 import pyrealsense2 as rs
-import math as m'
+import math as m
 from keras.models import load_model
 from sklearn.model_selection import train_test_split
 
@@ -40,9 +40,11 @@ from object_detection.vision_system import cameraSetup, openPoses
 from map_generation.map_generation import labelPath, filterPath
 
 #Load custom models
+model_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
 model_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
 
 #Summarize models
+model_OD.summary()
 model_RD.summary()
 
 ####################################
@@ -65,7 +67,7 @@ for currentFrame in frames:
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    detectedObjects = objectDetector(currentFrame)
+    detectedObjects = objectDetector(currentFrame, model_OD)
 
     ########
     # ROOM DETECTION:
@@ -85,8 +87,3 @@ for currentFrame in frames:
     #labelled path to determine the aproximate centroid of each room
     #Each entry in the list consists of x,y,room_label data
     filterPath(labeledPath)
-
-
-
-
-

@@ -6,9 +6,6 @@ import tensorflow as tf
 This method uses a custom FNN to detect rooms based on object labels. These
 object labels are gather by another network performing object detection on a 
 segmented RGBD image.
-
-Note: This script must be located in the room_classifier folder which contains the 
-model as a .pb file.
 """
 def roomDetector(x_val_tensor, model):
     #Wrap the model so it returns a probability
@@ -32,9 +29,6 @@ def roomDetector(x_val_tensor, model):
 This method uses a custom FNN which detects room to detect the most likely 
 room that a desired object can be found in. This is achieved by calling the model
 with only a single object as a input (rather then a list of detected objects).
-
-Note: This script must be located in the room_classifier folder which contains the 
-model as a .pb file.
 """
 def roomGuesser(targetObj, uniqueObjs, model):
     #Get list of unique object names from dataset (column titles EXCEPT room name)

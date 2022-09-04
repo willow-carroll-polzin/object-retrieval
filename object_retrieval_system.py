@@ -46,9 +46,11 @@ uniqueObjs = dataSet.columns[0:-1]
 pickledObjs.close()
 
 #Load custom models
+model_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
 model_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
 
 #Summarize models
+model_OD.summary()
 model_RD.summary()
 
 ####################################
@@ -72,7 +74,7 @@ if n == 0:
     targetObj = input('Enter a valid desired object: ')
 
 ########
-# INITAL PATH PLAN:
+# INTIAL PATH PLAN:
 ########
 # get current pose
 # plan path from current pose
@@ -99,7 +101,7 @@ while(not(targetObjStatus)):
         # OBJECT DETECTION:
         ########
         #Detect objects in current frame
-        detectedObjects, cameraPose = objectDetector(currentFrame)
+        detectedObjects = objectDetector(currentFrame, model_OD)
 
         ########
         # TARGET CHECK:
@@ -115,7 +117,7 @@ while(not(targetObjStatus)):
         # ROOM DETECTION:
         ########
         #Label rooms based on currently detected objects
-        detectedRooms, = roomDetector(detectedObjects,model_2_RD)
+        detectedRooms = roomDetector(detectedObjects,model_RD)
 
         ########
         # PATH PLANNING:
