@@ -1,50 +1,4 @@
-'''
-Inputs:
-*   Map
-  * x,y plot
-*   Robot Path Pose
-  * Pose contains x,y,room
-* List of all the rooms in the environemnt
-  * List of str
-Output:
-* Map with labeled room
-'''
-def extractAndLabelPoses(map, rooms, path):
-  with open('/content/drive/MyDrive/Colab Notebooks/data.csv') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    line_count = 0
-    for row in csv_reader:
-        if line_count == 0:
-          line_count += 1
-        else:
-          quat_rotx = row[8]
-          quat_roty = row[9]
-          quat_rotz = row[10]
-          quat_rotw = row[11]
-
-          w = float(quat_rotw)
-          x = -float(quat_rotz)
-          y = float(quat_rotx)
-          z = -float(quat_roty)
-
-          yaw   =  m.atan2(2.0 * (w*z + x*y), w*w + x*x - y*y - z*z) * 180.0 / m.pi;
-
-          path.append([x,y])
-
-          line_count += 1
-
-'''
-Inputs:
-*   Map
-  * x,y plot
-*   Robot Path Pose
-  * Pose contains x,y,room
-* List of all the rooms in the environemnt
-  * List of str
-Output:
-* Map with labeled room
-'''
-def filterPoses(map, rooms, path):
+def label_map(rooms, path):
 
   # Size of window filter
   window_size = 10
@@ -52,7 +6,15 @@ def filterPoses(map, rooms, path):
   # Counter that moves the window along the path
   path_idx = 1
 
+  # Setup a dictionnary to store all of the rooms and their positions
+  room_pos = {}
+
+  # Initialize the dictionnary to contain all of the found rooms
+  for room in rooms:
+    room_pos.update({room: []})
+
   for pose in path:
+
     # Setup a dictionnary to keep track of the occurance of each room within the filter
     room_occ = {}
 
@@ -98,4 +60,25 @@ def filterPoses(map, rooms, path):
     else:
       break
 
-    print("coordinate x,y: " + str(room_cord_x) + " " + str(room_cord_y) + " is in room " + in_room)
+    # Add the coordinates of each room to a running total. This is done to get the average position of each room.
+    for room in rooms:
+      if (in_room == room):
+        room_pos[room].append([room_cord_x, room_cord_y])
+
+
+  # Calculate the average room coordinate based off of the running total
+  for room in rooms:
+    x_tot = 0
+    y_tot = 0
+    room_len = len(room_pos[room])
+
+    # Increment the running total
+    for i in range(room_len):
+      x_tot = x_tot + room_pos[room][i][0];
+      y_tot = y_tot + room_pos[room][i][1];
+
+    # Clear the list and replace the entry with the centroid of the room.
+    room_pos[room].clear()
+    room_pos[room].append([x_tot/room_len, y_tot/room_len])
+
+  return(room_pos)
