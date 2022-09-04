@@ -13,10 +13,10 @@ The main components of the system are:
 # SETUP:
 ########
 #Directories with model weights and datasets
-NN1_OD_DIRECTORY = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/models/weights/V2 Improved versions/object_detector/'   #Object detector
-NN2_RD_DIRECTORY = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/models/weights/V2 Improved versions/room_classifier_3/' #Room detector/guessor
+NN1_OD_DIRECTORY = '/weights/object_detector/'   #Object detector
+NN2_RD_DIRECTORY = '/weights/room_classifier/' #Room detector/guessor
 TEST_DATASET = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/datasets/mit_indoors/processed/data_labelsOnly/'
-PICKLE_DIRECTORY = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/datasets/mit_indoors/processed/data_labelsOnly/'
+PICKLE_DIRECTORY = '/models/trained_data/data_labelsOnly/'
 
 #Import libraries and scripts
 import tensorflow as tf

@@ -15,10 +15,10 @@ The main components of the system are:
 # SETUP:
 ########
 #Directories with model weights and datasets
-NN1_OD_DIRECTORY = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/models/weights/V2 Improved versions/object_detector/'   #Object detector
-NN2_RD_DIRECTORY = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/models/weights/V2 Improved versions/room_classifier_3/' #Room detector/guessor
+NN1_OD_DIRECTORY = '/weights/object_detector/'   #Object detector
+NN2_RD_DIRECTORY = '/weights/room_classifier/' #Room detector/guessor
 TEST_DATASET = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/datasets/mit_indoors/processed/data_labelsOnly/'
-PICKLE_DIRECTORY = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/datasets/mit_indoors/processed/data_labelsOnly/'
+PICKLE_DIRECTORY = '/models/trained_data/data_labelsOnly/'
 
 #Import libraries and scripts
 import tensorflow as tf
@@ -56,8 +56,7 @@ model_RD.summary()
 # ACCESS PRE-RECORDED DATA (VIDEO+POSES):
 ########
 OFFLINE = True
-frames = cameraSetup(OFFLINE)
-poses = openPoses()
+frames, path = cameraSetup(OFFLINE)
 
 ########
 # MAIN LOOP:
@@ -81,7 +80,7 @@ for currentFrame in frames:
     #Parse the pose data and append room labels to each pose.
     #Each pose corresponds to a singular frame, and therefore
     #A singular room label
-    labeledPath = labelPath(detectedRooms, poses)
+    labeledPath = labelPath(detectedRooms, path)
 
     #Apply a low-pass filter to the list which contains the
     #labelled path to determine the aproximate centroid of each room
