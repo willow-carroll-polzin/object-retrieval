@@ -36,7 +36,7 @@ def labelPath(num_poses, num_pics):
         tot_x = tot_x + path[j+window_idx][0]
         tot_y = tot_y + path[j+window_idx][1]
       filt_path[i].append(tot_x/window_size, tot_y/window_size)
-      window_idx = window_index + window_size
+      window_idx = window_idx + window_size
     return filt_path
 
 def filterPath(rooms, path):

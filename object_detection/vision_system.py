@@ -23,6 +23,9 @@ def cameraSetup(OFFLINE):
     else:
         print("ONLINE MODE - TURN RS CAMS ON")
 
+
+
+
 # pipe_pose = rs.pipeline()
 # cfg_pose = rs.config()
 # cfg_pose.enable_stream(rs.stream.pose)
