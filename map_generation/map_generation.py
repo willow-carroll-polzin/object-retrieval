@@ -1,7 +1,7 @@
 import csv
 import math as m
 
-def get_labeled_path()
+def labelPath():
     path = []
     with open('/content/drive/MyDrive/Colab Notebooks/data.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
@@ -10,20 +10,22 @@ def get_labeled_path()
             if line_count == 0:
               line_count += 1
             else:
+              #Get data from current row in CSV
               quat_rotx = row[8]
               quat_roty = row[9]
               quat_rotz = row[10]
               quat_rotw = row[11]
     
+              #Convert quaternions from current pose to euler format
               w = float(quat_rotw)
               x = -float(quat_rotz)
               y = float(quat_rotx)
               z = -float(quat_roty)
-    
               yaw   =  m.atan2(2.0 * (w*z + x*y), w*w + x*x - y*y - z*z) * 180.0 / m.pi;
     
-              path.append([x,y])
-    
+              #Append current pose to path (all poses) and add in the current room for that pose
+              path.append([x,y]) # ADD ROOM
+
               line_count += 1
               
     return path
