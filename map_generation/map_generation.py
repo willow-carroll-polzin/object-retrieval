@@ -1,3 +1,34 @@
+import csv
+import math as m
+
+def get_labeled_path()
+    path = []
+    with open('/content/drive/MyDrive/Colab Notebooks/data.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+              line_count += 1
+            else:
+              quat_rotx = row[8]
+              quat_roty = row[9]
+              quat_rotz = row[10]
+              quat_rotw = row[11]
+    
+              w = float(quat_rotw)
+              x = -float(quat_rotz)
+              y = float(quat_rotx)
+              z = -float(quat_roty)
+    
+              yaw   =  m.atan2(2.0 * (w*z + x*y), w*w + x*x - y*y - z*z) * 180.0 / m.pi;
+    
+              path.append([x,y])
+    
+              line_count += 1
+              
+    return path
+
+
 def filterPath(rooms, path):
   # Size of window filter
   window_size = 10
