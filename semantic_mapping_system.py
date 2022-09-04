@@ -19,6 +19,7 @@ NN1_OD_DIRECTORY = '/weights/object_detector/'   #Object detector
 NN2_RD_DIRECTORY = '/weights/room_classifier/' #Room detector/guessor
 TEST_DATASET = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/datasets/mit_indoors/processed/data_labelsOnly/'
 PICKLE_DIRECTORY = '/models/trained_data/data_labelsOnly/'
+DETECTED_OBJS_DIRECTORY = '/dataset/detectedObjs'
 
 #Import libraries and scripts
 import tensorflow as tf
@@ -36,8 +37,8 @@ from sklearn.model_selection import train_test_split
 
 from room_detection.room_detection import roomDetector
 from object_detection.object_detection import objectDetector
-from object_detection.vision_system import cameraSetup, openPoses
-from map_generation.map_generation import labelPath, filterPath
+from object_detection.vision_system import cameraSetup
+from map_generation.map_generation import labelPath, roomLocalizer
 
 #Load custom models
 model_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
@@ -66,7 +67,13 @@ for currentFrame in frames:
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    detectedObjects = objectDetector(currentFrame, model_OD)
+    objectDetector(currentFrame, model_OD)
+    
+    #Get detected objects from PKL file
+    pickledObjs = open(DETECTED_OBJS_DIRECTORY+"detectedObjs.pkl","rb")
+    detectedObjects = pickle.load(pickledObjs)
+    detectedObjects = dataSet.columns[0:-1]
+    pickledObjs.close()
 
     ########
     # ROOM DETECTION:
@@ -82,7 +89,9 @@ for currentFrame in frames:
     #A singular room label
     labeledPath = labelPath(detectedRooms, path)
 
-    #Apply a low-pass filter to the list which contains the
-    #labelled path to determine the aproximate centroid of each room
-    #Each entry in the list consists of x,y,room_label data
-    filterPath(labeledPath)
+    #???????
+    rooms = roomLocalizer(labeledPath)
+
+    #Save rooms as data??
+
+    

@@ -32,7 +32,8 @@ from sklearn.model_selection import train_test_split
 
 from room_detection.room_detection import roomGuesser, roomDetector
 from object_detection.object_detection import objectDetector
-from object_detection.vision_system import cameraSetup, openPoses
+from object_detection.vision_system import cameraSetup
+from path_planner.path_planner import path_planner
 
 #Import dataset
 pickledData = open(PICKLE_DIRECTORY+"listOfAllObj_v3.pkl","rb")
@@ -83,8 +84,7 @@ if n == 0:
 # ACCESS PRE-RECORDED DATA (VIDEO+POSES):
 ########
 OFFLINE = True
-frames = cameraSetup(OFFLINE)
-poses = openPoses()
+frames, path = cameraSetup(OFFLINE)
 
 ########
 # MAIN LOOP:
@@ -109,7 +109,6 @@ while(not(targetObjStatus)):
         if targetObj in detectedObjects:
             targetObjStatus = True
             print(f'The {targetObj} has been found!' )
-            break
         else:
             print('Still searching for target object')
 
@@ -125,3 +124,14 @@ while(not(targetObjStatus)):
         # confirm current room matches map (detectedRooms + currentPose + labeledMapFile)
         # update local path
         # if path end has been reached, throw err msg
+
+        #Load in pre-recorded map
+        currentMap = grab_map()
+
+        #Load in pre-recorded localized rooms
+        rooms = grab_rooms()
+
+        #Get current pose for the frame
+
+
+        path_planner(currentMap, targetObjStatus, detectedRooms, rooms, current_pose)

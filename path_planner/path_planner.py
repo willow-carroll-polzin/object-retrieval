@@ -3,7 +3,7 @@ def path_planner(map, obj, p_room, rooms, current_pose):
   destinations = []
 
   # Set the goal
-  if (obj != -1) # We saw the object while we were mapping. Let's navigate straight to the object.
+  if (obj) # We saw the object while we were mapping. Let's navigate straight to the object.
     destinations.append(obj)
   else # We didn't see the object while we were mapping. Let's navigate from most probable room to least probable room.
     
@@ -20,7 +20,7 @@ def path_planner(map, obj, p_room, rooms, current_pose):
     
     # Since we do not have a robot, a random function will determine if we found the object in the room.
     # If we already saw the object while we were mapping, this probability function does not apply and is always true
-    found = (True if (rand() > 0.2) or (obj != -1) else False)
+    found = (True if (rand() > 0.2) or (obj) else False)
 
     if (found)
       break

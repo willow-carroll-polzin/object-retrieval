@@ -59,7 +59,7 @@ def labelPath(num_poses, num_pics):
       window_idx = window_idx + window_size
     return filt_path
 
-def filterPath(rooms, path):
+def roomLocalizer(rooms, path):
   # Size of window filter
   window_size = 10
 
