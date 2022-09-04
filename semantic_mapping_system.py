@@ -5,10 +5,10 @@ Semantic Mapping System - V1.0
 This system performs semantic mapping tasks of a indoor space.
 
 The main components of the system are:
-1.   Metric map generation using RGBD data
-2.   Object detection performed on live feed from RGB data
+1.   Metric map generation using live or prerecorded video with RGBD data
+2.   Object detection performed on live or prerecorded video with RGB data
 3.   Room detection based on object labels from object detection
-4.   Labelling of the metric map with room labels
+4.   Labelling of the metric map with room labels and camera pose from live or prerecorded video
 '''
 
 ########
@@ -34,20 +34,10 @@ import math as m
 from keras.models import load_model
 from sklearn.model_selection import train_test_split
 
-from room_detection.room_detection import roomGuesser, roomDetector
-from object_detection import objectDetector
-from map_generation import label_map
-
-#Import dataset
-pickledData = open(PICKLE_DIRECTORY+"listOfAllObj_v3.pkl","rb")
-dataSet = pickle.load(pickledData)
-pickledData.close()
-
-#Import list of unqiue objects from training dataset
-pickledObjs = open(PICKLE_DIRECTORY+"uniqueObjs_v3.pkl","rb")
-uniqueObjs = pickle.load(pickledObjs)
-uniqueObjs = dataSet.columns[0:-1]
-pickledObjs.close()
+from room_detection.room_detection import roomDetector
+from object_detection.object_detection import objectDetector
+from map_generation.map_generation import extractAndLabelPoses, filterPoses
+from vision_system.vision_system import grabFrame, cameraSetup
 
 #Load models
 model_1_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
@@ -57,53 +47,51 @@ model_2_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
 model_1_OD.summary()
 model_2_RD.summary()
 
+####################################
+# OFFLINE VERSION
+# This version of the system loads a 
+# pre-recorded map and video file.
+####################################
+########
+# SETUP VIDEO:
+########
+OFFLINE = True
+cameraSetup(OFFLINE)
+
 ########
 # MAIN LOOP:
 ########
-#Get a desired object from the user
-targetObj = input('Enter the desired object: ')
-#print(f'You entered - {targetObj}')
+haveFrames = True
+while (haveFrames):
+    ########
+    # ACCESS VIDEO:
+    ########
+    currentFrame, currentPose, haveFrames = grabFrame()
 
-targetObjStatus = False
-while(targetObjStatus == False):
     ########
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    detectedObjects, cameraPose = objectDetector(model_1_OD)
-
-    ########
-    # TARGET CHECK:
-    ########
-    if targetObj in detectedObjects:
-        targetObjStatus = True
-        print(f'The {targetObj} has been found!' )
-        break
-    else:
-        print('Still searching for target object')
+    detectedObjects, cameraPose = objectDetector(model_1_OD, currentFrame)
 
     ########
     # ROOM DETECTION:
     ########
     #Label rooms based on currently detected objects
-    detectedRooms, = roomDetector(detectedObjects,model_2_RD)
+    detectedRooms = roomDetector(detectedObjects,model_2_RD)
 
     ########
-    # ROOM GUESSING:
+    # MAPPING:
     ########
-    #Search for singular objects in the current input and return top results
-    result, n = roomGuesser(targetObj, uniqueObjs, model_2_RD)
+    #Parse the pose data and append room labels to each pose.
+    #Each pose corresponds to a singular frame, and therefore
+    #A singular room label
+    labeledPath = extractAndLabelPoses(detectedRooms)
 
-    #Check if result is valid
-    if n == 0:
-        print(result[0])
-        #Get a new desired object from the user
-        targetObj = input('Enter a valid desired object: ')
-        break
-
-    ########
-    # PATH PLANNING:
-    ########
+    #Apply a low-pass filter to the list which contains the
+    #labelled path to determine the aproximate centroid of each room
+    #Each entry in the list consists of x,y,room_label data
+    filterPath(labeledPath)
 
 
 

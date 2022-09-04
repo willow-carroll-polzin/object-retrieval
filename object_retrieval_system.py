@@ -31,7 +31,8 @@ from keras.models import load_model
 from sklearn.model_selection import train_test_split
 
 from room_detection.room_detection import roomGuesser, roomDetector
-from object_detection import objectDetector
+from object_detection.object_detection import objectDetector
+from vision_system.vision_system import grabFrame, cameraSetup
 
 #Import dataset
 pickledData = open(PICKLE_DIRECTORY+"listOfAllObj_v3.pkl","rb")
@@ -52,20 +53,54 @@ model_2_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
 model_1_OD.summary()
 model_2_RD.summary()
 
+####################################
+# OFFLINE VERSION
+# This version of the system loads a 
+# pre-recorded map and video file.
+####################################
 ########
-# MAIN LOOP:
+# ROOM GUESSING:
 ########
 #Get a desired object from the user
 targetObj = input('Enter the desired object: ')
-#print(f'You entered - {targetObj}')
 
+#Search for singular objects in the current input and return top results
+result, n = roomGuesser(targetObj, uniqueObjs, model_2_RD)
+
+#Check if result is valid
+if n == 0:
+    print(result[0])
+    #Get a new desired object from the user
+    targetObj = input('Enter a valid desired object: ')
+
+########
+# INITAL PATH PLAN:
+########
+# get current pose
+# plan path from current pose
+
+########
+# SETUP VIDEO:
+########
+OFFLINE = True
+cameraSetup(OFFLINE)
+
+########
+# MAIN LOOP:
+########
 targetObjStatus = False
-while(targetObjStatus == False):
+haveFrames = True
+while(not(targetObjStatus) and haveFrames):
+    ########
+    # ACCESS VIDEO:
+    ########
+    currentFrame, currentPose, haveFrames = grabFrame()
+
     ########
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    detectedObjects, cameraPose = objectDetector(model_1_OD)
+    detectedObjects, cameraPose = objectDetector(model_1_OD, currentFrame)
 
     ########
     # TARGET CHECK:
@@ -84,18 +119,8 @@ while(targetObjStatus == False):
     detectedRooms, = roomDetector(detectedObjects,model_2_RD)
 
     ########
-    # ROOM GUESSING:
-    ########
-    #Search for singular objects in the current input and return top results
-    result, n = roomGuesser(targetObj, uniqueObjs, model_2_RD)
-
-    #Check if result is valid
-    if n == 0:
-        print(result[0])
-        #Get a new desired object from the user
-        targetObj = input('Enter a valid desired object: ')
-        break
-
-    ########
     # PATH PLANNING:
     ########
+    # confirm current room matches map (detectedRooms + currentPose + labeledMapFile)
+    # update local path
+    # if path end has been reached, throw err msg

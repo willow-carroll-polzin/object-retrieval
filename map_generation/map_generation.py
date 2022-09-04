@@ -9,8 +9,42 @@ Inputs:
 Output:
 * Map with labeled room
 '''
+def extractAndLabelPoses(map, rooms, path):
+  with open('/content/drive/MyDrive/Colab Notebooks/data.csv') as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    line_count = 0
+    for row in csv_reader:
+        if line_count == 0:
+          line_count += 1
+        else:
+          quat_rotx = row[8]
+          quat_roty = row[9]
+          quat_rotz = row[10]
+          quat_rotw = row[11]
 
-def label_map(map, rooms, path):
+          w = float(quat_rotw)
+          x = -float(quat_rotz)
+          y = float(quat_rotx)
+          z = -float(quat_roty)
+
+          yaw   =  m.atan2(2.0 * (w*z + x*y), w*w + x*x - y*y - z*z) * 180.0 / m.pi;
+
+          path.append([x,y])
+
+          line_count += 1
+
+'''
+Inputs:
+*   Map
+  * x,y plot
+*   Robot Path Pose
+  * Pose contains x,y,room
+* List of all the rooms in the environemnt
+  * List of str
+Output:
+* Map with labeled room
+'''
+def filterPoses(map, rooms, path):
 
   # Size of window filter
   window_size = 10
@@ -18,8 +52,7 @@ def label_map(map, rooms, path):
   # Counter that moves the window along the path
   path_idx = 1
 
-  for pose in path:-
-
+  for pose in path:
     # Setup a dictionnary to keep track of the occurance of each room within the filter
     room_occ = {}
 
