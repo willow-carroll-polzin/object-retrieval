@@ -7,6 +7,7 @@ This method uses a custom FNN to detect rooms based on object labels. These
 object labels are gather by another network performing object detection on a 
 segmented RGBD image.
 """
+desiredRooms = ['bathroom','bedroom','dining_room','corridor','livingroom','kitchen','office']
 def roomDetector(x_val_tensor, model):
     #Wrap the model so it returns a probability
     probability_model = tf.keras.Sequential([
@@ -15,14 +16,13 @@ def roomDetector(x_val_tensor, model):
     ])
 
     #Run room detection model
-    y_pred = model.predict(x_val_tensor)
+    y_pred = model.predict(x_val_tensor,verbose=0)
 
     #Determine classification from the outputed probabilities
     y_classes = []
     for y in y_pred:
         y_classes.append(y.argmax())
-    print(y_classes)
-
+    print(desiredRooms[y_classes[0]])
     return y_classes
 
 """
