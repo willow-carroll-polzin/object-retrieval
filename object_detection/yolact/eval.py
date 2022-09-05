@@ -1,14 +1,14 @@
-from data import COCODetection, get_label_map, MEANS, COLORS
-from yolact import Yolact
-from utils.augmentations import BaseTransform, FastBaseTransform, Resize
-from utils.functions import MovingAverage, ProgressBar
-from layers.box_utils import jaccard, center_size, mask_iou
-from utils import timer
-from utils.functions import SavePath
-from layers.output_utils import postprocess, undo_image_transformation
+from object_detection.yolact.data import COCODetection, get_label_map, MEANS, COLORS
+from object_detection.yolact.yolact import Yolact
+from object_detection.yolact.utils.augmentations import BaseTransform, FastBaseTransform, Resize
+from object_detection.yolact.utils.functions import MovingAverage, ProgressBar
+from object_detection.yolact.layers.box_utils import jaccard, center_size, mask_iou
+from object_detection.yolact.utils import timer
+from object_detection.yolact.utils.functions import SavePath
+from object_detection.yolact.layers.output_utils import postprocess, undo_image_transformation
 import pycocotools
 
-from data import cfg, set_cfg, set_dataset
+from object_detection.yolact.data import cfg, set_cfg, set_dataset
 
 import numpy as np
 import torch
@@ -137,6 +137,11 @@ def prep_display(dets_out, img, h, w, undo_transform=True, class_color=False, ma
     """
     Note: If undo_transform=False then im_h and im_w are allowed to be None.
     """
+    #Setup arguments that would be set in command line
+    display_lincomb = True
+    crop = True
+    score_threshold = 0.15
+    top_k = 4
     if undo_transform:
         img_numpy = undo_image_transformation(img, w, h)
         img_gpu = torch.Tensor(img_numpy).cuda()
@@ -147,22 +152,22 @@ def prep_display(dets_out, img, h, w, undo_transform=True, class_color=False, ma
     with timer.env('Postprocess'):
         save = cfg.rescore_bbox
         cfg.rescore_bbox = True
-        t = postprocess(dets_out, w, h, visualize_lincomb = args.display_lincomb,
-                                        crop_masks        = args.crop,
-                                        score_threshold   = args.score_threshold)
+        t = postprocess(dets_out, w, h, visualize_lincomb = display_lincomb,
+                                        crop_masks        = crop,
+                                        score_threshold   = score_threshold)
         cfg.rescore_bbox = save
 
     with timer.env('Copy'):
-        idx = t[1].argsort(0, descending=True)[:args.top_k]
+        idx = t[1].argsort(0, descending=True)[:top_k]
         
         if cfg.eval_mask_branch:
             # Masks are drawn on the GPU, so don't copy
             masks = t[3][idx]
-        classes, scores, boxes = [x[idx].cpu().numpy() for x in t[:3]]
+        classes, scores, boxes = [x[idx].cpu().detach().numpy() for x in t[:3]]
 
-    num_dets_to_consider = min(args.top_k, classes.shape[0])
+    num_dets_to_consider = min(top_k, classes.shape[0])
     for j in range(num_dets_to_consider):
-        if scores[j] < args.score_threshold:
+        if scores[j] < score_threshold:
             num_dets_to_consider = j
             break
 
@@ -230,12 +235,11 @@ def prep_display(dets_out, img, h, w, undo_transform=True, class_color=False, ma
         text_color = [255, 255, 255]
 
         cv2.putText(img_numpy, fps_str, text_pt, font_face, font_scale, text_color, font_thickness, cv2.LINE_AA)
-    
+    obj_vector = np.zeros(len(cfg.dataset.class_names))
     if num_dets_to_consider == 0:
-        return img_numpy
+        return img_numpy,obj_vector
 
     if args.display_text or args.display_bboxes:
-        obj_vector = np.zeros(len(cfg.dataset.class_names))
         
         for j in reversed(range(num_dets_to_consider)):
             x1, y1, x2, y2 = boxes[j, :]
@@ -265,7 +269,6 @@ def prep_display(dets_out, img, h, w, undo_transform=True, class_color=False, ma
                 cv2.putText(img_numpy, text_str, text_pt, font_face, font_scale, text_color, font_thickness, cv2.LINE_AA)
             
         obj_tensor = torch.Tensor(obj_vector)
-        print(obj_tensor)
     return img_numpy,obj_tensor
 
 def prep_benchmark(dets_out, h, w):
@@ -603,7 +606,7 @@ def evalimage(net:Yolact, path:str, save_path:str=None):
     frame = torch.from_numpy(cv2.imread(path)).cuda().float()
     batch = FastBaseTransform()(frame.unsqueeze(0))
     preds = net(batch)
-
+    save_path = "./test.png"
     img_numpy,obj_tensor = prep_display(preds, frame, None, None, undo_transform=False)
     
     if save_path is None:
@@ -1061,9 +1064,14 @@ def print_maps(all_maps):
     print()
 
 def setup():
+    parse_args()
     set_cfg("yolact_base_config")
-    trained_model = SavePath.get_latest('weights/', cfg.name)
-
+    #trained_model = SavePath.get_latest('weights/', cfg.name)
+    trained_model = "./object_detection/yolact/weights/yolact_base_54_800000.pth"
+    cfg.eval_mask_branch = False
+    cfg.mask_proto_debug = False
+    class_names = cfg.dataset.class_names
+    label_map=cfg.dataset.label_map
     with torch.no_grad():
         if not os.path.exists('results'):
             os.makedirs('results')
@@ -1077,7 +1085,7 @@ def setup():
         net.eval()
         print(' Done.')
         net = net.cuda()
-	return net, dataset
+        return net, dataset, class_names,label_map
 
 if __name__ == '__main__':
     parse_args()
