@@ -37,11 +37,13 @@ from object_detection.object_detection import objectDetector
 from object_detection.vision_system import cameraSetup
 from path_planner.path_planner import path_planner
 from object_detection.yolact.eval import setup, evalFrame
+from semantic_mapping_system import map,convertCOCO2MIT_tensor
 
 # OBJECT DETECTION:
 ########
 net, dataset, class_names,label_map = setup()
 ########
+
 #Import dataset
 # pickledData = open(RD_TRAINED_DATA_DIRECTORY+"listOfAllObj_v3.pkl","rb")
 # dataSet = pickle.load(pickledData)
@@ -55,8 +57,8 @@ net, dataset, class_names,label_map = setup()
 
 # #Load custom models
 # model_OD = tf.keras.models.load_model(NN1_OD_DIRECTORY)
-# with tf.device('/cpu:0'):
-#     model_RD = tf.keras.models.load_model(NN_RD_DIRECTORY)
+with tf.device('/cpu:0'):
+    model_RD = tf.keras.models.load_model(NN_RD_DIRECTORY)
 
 # #Summarize models
 # model_OD.summary()
@@ -67,7 +69,7 @@ net, dataset, class_names,label_map = setup()
 
 MIT_CLASSES = open("./object_detection/yolact/data/archive/mit_data.txt","r").read().split("\n")
 MIT_CLASSES = MIT_CLASSES[1:]
-
+m=map(MIT_CLASSES,class_names,label_map)
 ####################################
 # OFFLINE VERSION
 # This version of the system loads a 
@@ -144,7 +146,8 @@ while(not(targetObjStatus)):
         # ROOM DETECTION:
         ########
         #Label rooms based on currently detected objects
-        # detectedRooms = roomDetector(obj_tensor,model_RD)
+        mit_object = tf.constant(convertCOCO2MIT_tensor(obj_tensor,m),shape=(1,2204))
+        detectedRooms = roomDetector(mit_object,model_RD)
         del obj_tensor
         #model_RD = model_RD.cpu()
         ########

@@ -625,7 +625,7 @@ def evalimages(net:Yolact, input_folder:str, output_folder:str):
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
 
-    print()
+    #print()
     obj_tensors=[]
     for p in Path(input_folder).glob('*'): 
         path = str(p)
@@ -634,9 +634,9 @@ def evalimages(net:Yolact, input_folder:str, output_folder:str):
         out_path = os.path.join(output_folder, name)
 
         obj_tensor,img_numpy = evalimage(net, path, out_path)
-        print(path + ' -> ' + out_path)
+        #print(path + ' -> ' + out_path)
         obj_tensors.append(obj_tensor)
-    print('Done.')
+    #print('Done.')
     return obj_tensors,img_numpy
 
 
