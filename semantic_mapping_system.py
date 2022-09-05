@@ -38,6 +38,7 @@ from room_detection.room_detection import roomDetector
 from object_detection.object_detection import objectDetector
 from object_detection.vision_system import cameraSetup
 from map_generation.map_generation import labelPath, roomLocalizer
+from object_detection.yolact.eval import setup, evalFrame
 
 #Load custom models
 model_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
@@ -50,6 +51,12 @@ model_RD.summary()
 # This version of the system loads a 
 # pre-recorded map and video file.
 ####################################
+
+########
+# SETUP YOLACT MODEL
+########
+net, dataset = setup()
+
 ########
 # ACCESS PRE-RECORDED DATA (VIDEO+POSES):
 ########
@@ -64,7 +71,7 @@ for currentFrame in frames:
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    objectDetector(frames, DETECTED_OBJS_DIRECTORY)
+    obj_tensor=evalFrame(net,currentFrame)
     
     #Get detected objects from PKL file
     pickledObjs = open(DETECTED_OBJS_DIRECTORY+"detectedObjs.pkl","rb")
