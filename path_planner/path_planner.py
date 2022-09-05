@@ -97,6 +97,16 @@ def astar(map, start, end):
             # Add the child to the open list
             open_list.append(child)
 
+'''
+Inputs:
+  map_path = file path to map
+  obj = tuple (x,y), if obj not det then x & y == -1
+  p_room = tuple (room_label, prob) 
+  rooms = dictionary (room_label -> [x,y])
+  current_pose = tuple (x,y)
+Outputs:
+  map_image = image with path, doesnt save the image
+'''
 def path_planner(map_path, obj, p_room, rooms, current_pose):
   # Open map image
   map_image = Image.open(map_path)
@@ -104,7 +114,7 @@ def path_planner(map_path, obj, p_room, rooms, current_pose):
   # Convert map image to array
   raw_map = asarray(map_image)
 
-  # C
+  # Init map
   map = [[0 for i in range(len(raw_map[1]))] for j in range(len(raw_map))]
 
   # Format map so that objects = 1 and free space = 0

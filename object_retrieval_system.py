@@ -17,6 +17,7 @@ The main components of the system are:
 NN_RD_DIRECTORY = './models/nn_room_detector/' #Room detector/guessor
 TEST_DATASET = '/gdrive/My Drive/Colab Notebooks/SYSC 5906/datasets/mit_indoors/processed/data_labelsOnly/'
 RD_TRAINED_DATA_DIRECTORY = '/models/trained_data/data_labelsOnly/'
+MAP_PATH = '/datasets/maps/sample/'
 
 #Import libraries and scripts
 import tensorflow as tf
@@ -150,7 +151,6 @@ while(not(targetObjStatus)):
         # PATH PLANNING:
         ########
         #Load in pre-recorded map
-        currentMap = grab_map()
 
         #Load in pre-recorded localized rooms
         #rooms = grab_rooms()
@@ -158,4 +158,4 @@ while(not(targetObjStatus)):
         #Get current pose for the frame
 
 
-        path_planner(currentMap, targetObjStatus, detectedRooms, rooms, current_pose)
+        path_planner(MAP_PATH, targetObjStatus, detectedRooms, rooms, current_pose)
