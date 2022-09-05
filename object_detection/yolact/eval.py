@@ -606,19 +606,20 @@ def evalimage(net:Yolact, path:str, save_path:str=None):
     frame = torch.from_numpy(cv2.imread(path)).cuda().float()
     batch = FastBaseTransform()(frame.unsqueeze(0))
     preds = net(batch)
+    print(path)
     save_path = "./test.png"
     img_numpy,obj_tensor = prep_display(preds, frame, None, None, undo_transform=False)
     
-    if save_path is None:
-        img_numpy = img_numpy[:, :, (2, 1, 0)]
+    # if save_path is None:
+    #     img_numpy = img_numpy[:, :, (2, 1, 0)]
 
-    if save_path is None:
-        plt.imshow(img_numpy)
-        plt.title(path)
-        plt.show()
-    else:
-        cv2.imwrite(save_path, img_numpy)
-    return obj_tensor
+    # if save_path is None:
+    #     plt.imshow(img_numpy)
+    #     plt.title(path)
+    #     plt.show()
+    # else:
+    #     cv2.imwrite(save_path, img_numpy)
+    return obj_tensor,img_numpy
 
 def evalimages(net:Yolact, input_folder:str, output_folder:str):
     if not os.path.exists(output_folder):
@@ -632,11 +633,11 @@ def evalimages(net:Yolact, input_folder:str, output_folder:str):
         name = '.'.join(name.split('.')[:-1]) + '.png'
         out_path = os.path.join(output_folder, name)
 
-        obj_tensor = evalimage(net, path, out_path)
+        obj_tensor,img_numpy = evalimage(net, path, out_path)
         print(path + ' -> ' + out_path)
         obj_tensors.append(obj_tensor)
     print('Done.')
-    return obj_tensors
+    return obj_tensors,img_numpy
 
 
 from multiprocessing.pool import ThreadPool
@@ -883,8 +884,8 @@ def evalvideo(net:Yolact, path:str, out_path:str=None):
     cleanup_and_exit()
 ## FUNCTION FOR EVALUATING ONE FRAME AND RETURNING THE OBJECT TENSOR
 def evalFrame(net: Yolact,image_path):
-    obj_tensor=evalimage(net,image_path)
-    return obj_tensor
+    obj_tensor,img_numpy=evalimage(net,image_path)
+    return obj_tensor,img_numpy
     
 def evaluate(net:Yolact, dataset, train_mode=False):
     net.detect.use_fast_nms = args.fast_nms

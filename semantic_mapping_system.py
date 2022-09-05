@@ -103,7 +103,7 @@ m = map(MIT_CLASSES,coco_class_list,COCO_MAP)
 test_mit_obj = convertCOCO2MIT_tensor(test_coco_obj,m)
 print(test_mit_obj)
 print(MIT_CLASSES[np.where(test_mit_obj != 0)[0][0]])
-
+list_of_images = []
 ########
 # MAIN LOOP:
 ########
@@ -114,7 +114,9 @@ for currentFrame in frames:
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
-    obj_tensors.append(evalFrame(net,currentFrame))
+    obj,img = evalFrame(net,currentFrame)
+    obj_tensors.append(obj)
+    #list_of_images.append(img)
     #print(obj_tensor)
     #Get detected objects from PKL file
     # pickledObjs = open(DETECTED_OBJS_DIRECTORY+".pkl","rb")

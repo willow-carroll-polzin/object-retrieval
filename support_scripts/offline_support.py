@@ -7,10 +7,10 @@ import pandas as pd
 def openImages():
     image_list = []
     filelist = glob.glob('/dataset/images/*.jpg')
-    filelist = os.listdir('./dataset/images/sample/')
+    filelist = os.listdir('./dataset/images/run1/')
     for file in filelist:
-        image = Image.open(os.getcwd()+"/dataset/images/sample/"+file)
-        image_list.append(os.getcwd()+"/dataset/images/sample/"+file)
+        image = Image.open(os.getcwd()+"/dataset/images/run1/"+file)
+        image_list.append(os.getcwd()+"/dataset/images/run1/"+file)
     return image_list
 
 def openPath():

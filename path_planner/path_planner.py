@@ -160,4 +160,5 @@ def path_planner(map_path, obj, p_room, rooms, current_pose):
 
   return map_image
 
-path_planner('/content/drive/MyDrive/Colab Notebooks/map.pgm', obj, p_rooms, rooms, current_pose)
+#seems like below line was added for testing and is not needed
+#path_planner('/content/drive/MyDrive/Colab Notebooks/map.pgm', obj, p_rooms, rooms, current_pose)
