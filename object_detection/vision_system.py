@@ -2,12 +2,12 @@ import pyrealsense2 as rs
 import pandas as pd
 import math as m
 import glob
-from PIL import image
-from support_scripts.offline_support import openImage, openPoses
+from PIL import Image
+from support_scripts.offline_support import openImages, openPath
 
 def cameraSetup(OFFLINE):
     if OFFLINE:
-        return openImage(), openPath()
+        return openImages()#, openPath()
     else:
         print("ONLINE MODE - TURN RS-CAMS ON")
 

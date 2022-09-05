@@ -27,7 +27,8 @@ import pickle
 import sklearn as sk
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow_datasets as tfds
+import glob
+#import tensorflow_datasets as tfds
 import keras.api._v2.keras as keras
 import pyrealsense2 as rs
 import math as m
@@ -41,7 +42,7 @@ from map_generation.map_generation import labelPath, roomLocalizer
 from object_detection.yolact.eval import setup, evalFrame
 
 #Load custom models
-model_RD = tf.keras.models.load_model(NN2_RD_DIRECTORY)
+model_RD = tf.keras.models.load_model(NN_RD_DIRECTORY)
 
 #Summarize models
 model_RD.summary()
@@ -55,35 +56,37 @@ model_RD.summary()
 ########
 # SETUP YOLACT MODEL
 ########
-net, dataset = setup()
+net, dataset, class_names,label_map = setup()
 
+print(class_names)
 ########
 # ACCESS PRE-RECORDED DATA (VIDEO+POSES):
 ########
 OFFLINE = True
-frames, path = cameraSetup(OFFLINE)
- 
+frames= cameraSetup(OFFLINE)
+print(str(len(frames)) + " frames found.") 
 ########
 # MAIN LOOP:
 ########
 for currentFrame in frames:
+    #print(currentFrame)
     ########
     # OBJECT DETECTION:
     ########
     #Detect objects in current frame
     obj_tensor=evalFrame(net,currentFrame)
-    
+    #print(obj_tensor)
     #Get detected objects from PKL file
-    pickledObjs = open(DETECTED_OBJS_DIRECTORY+"detectedObjs.pkl","rb")
-    detectedObjects = pickle.load(pickledObjs)
-    detectedObjects = dataSet.columns[0:-1]
-    pickledObjs.close()
+    # pickledObjs = open(DETECTED_OBJS_DIRECTORY+".pkl","rb")
+    # detectedObjects = pickle.load(pickledObjs)
+    # detectedObjects = dataSet.columns[0:-1]
+    # pickledObjs.close()
 
     ########
     # ROOM DETECTION:
     ########
     #Label rooms based on currently detected objects
-    detectedRooms = roomDetector(detectedObjects,model_RD)
+    detectedRooms = roomDetector(obj_tensor,model_RD)
 
     ########
     # MAPPING:
@@ -91,10 +94,10 @@ for currentFrame in frames:
     #Parse the pose data and append room labels to each pose.
     #Each pose corresponds to a singular frame, and therefore
     #A singular room label
-    labeledPath = labelPath(detectedRooms, path)
+    # labeledPath = labelPath(detectedRooms, path)
 
     #???????
-    rooms = roomLocalizer(labeledPath)
+    #rooms = roomLocalizer(labeledPath)
 
     #Save rooms as data??
 
