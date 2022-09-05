@@ -50,6 +50,10 @@ model_RD.summary()
 # This version of the system loads a 
 # pre-recorded map and video file.
 ####################################
+#######
+# SETUP OBJECT DETECTOR
+#######
+
 ########
 # ACCESS PRE-RECORDED DATA (VIDEO+POSES):
 ########
