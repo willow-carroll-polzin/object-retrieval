@@ -22,8 +22,8 @@ def roomDetector(x_val_tensor, model):
     y_classes = []
     for y in y_pred:
         y_classes.append(y.argmax())
-    print(desiredRooms[y_classes[0]])
-    return y_classes
+    #print(desiredRooms[y_classes[0]])
+    return y_classes,desiredRooms[y_classes[0]]
 
 """
 This method uses a custom FNN which detects room to detect the most likely 

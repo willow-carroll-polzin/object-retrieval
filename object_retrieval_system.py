@@ -27,7 +27,7 @@ import sklearn as sk
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-
+import cv2
 import keras.api._v2.keras as keras
 from keras.models import load_model
 from sklearn.model_selection import train_test_split
@@ -39,10 +39,7 @@ from path_planner.path_planner import path_planner
 from object_detection.yolact.eval import setup, evalFrame
 from semantic_mapping_system import map,convertCOCO2MIT_tensor
 
-# OBJECT DETECTION:
-########
-net, dataset, class_names,label_map = setup()
-########
+
 
 #Import dataset
 # pickledData = open(RD_TRAINED_DATA_DIRECTORY+"listOfAllObj_v3.pkl","rb")
@@ -69,7 +66,7 @@ with tf.device('/cpu:0'):
 
 MIT_CLASSES = open("./object_detection/yolact/data/archive/mit_data.txt","r").read().split("\n")
 MIT_CLASSES = MIT_CLASSES[1:]
-m=map(MIT_CLASSES,class_names,label_map)
+
 ####################################
 # OFFLINE VERSION
 # This version of the system loads a 
@@ -82,10 +79,9 @@ m=map(MIT_CLASSES,class_names,label_map)
 #Get a desired object from the user
 targetObj = input('Enter the desired object: ')
 
-#Search for singular objects in the current input and return top results
+# #Search for singular objects in the current input and return top results
 # result, n = roomGuesser(targetObj, MIT_CLASSES, model_RD)
-
-# del model_RD
+# del model_RD, result, n
 
 #Check if result is valid
 # if n == 0:
@@ -114,20 +110,27 @@ frames = cameraSetup(OFFLINE)
 
 targetObjStatus = False
 haveFrames = True
+# OBJECT DETECTION:
+########
+torch.cuda.empty_cache()
+net, dataset, class_names,label_map = setup()
+m=map(MIT_CLASSES,class_names,label_map)
+########
 while(not(targetObjStatus)):
-    #Check if target was found in the last analysed frame
-    if targetObjStatus:
-        break
+
 
     for currentFrame in frames:
+        #Check if target was found in the last analysed frame
+        if targetObjStatus:
+            break
         ########
         # OBJECT DETECTION:
         ########
         #Detect objects in current frame
-        obj_tensor,img = evalFrame(net,currentFrame)
+        obj_tensor_coco,img = evalFrame(net,currentFrame)
         obj_name_list = []
-        for i in range(len(obj_tensor)):
-            if obj_tensor[i]>0:
+        for i in range(len(obj_tensor_coco)):
+            if obj_tensor_coco[i]>0:
                 obj_name_list.append(class_names[i])
 
         ########
@@ -140,15 +143,15 @@ while(not(targetObjStatus)):
             print('Still searching for target object')
         
         #switch active model
-        torch.cuda.empty_cache()
+        #torch.cuda.empty_cache()
         #model_RD = tf.keras.models.load_model(NN_RD_DIRECTORY)
         ########
         # ROOM DETECTION:
         ########
-        #Label rooms based on currently detected objects
-        mit_object = tf.constant(convertCOCO2MIT_tensor(obj_tensor,m),shape=(1,2204))
-        detectedRooms = roomDetector(mit_object,model_RD)
-        del obj_tensor
+        # #Label rooms based on currently detected objects
+        # mit_object = tf.constant(convertCOCO2MIT_tensor(obj_tensor,m),shape=(1,2204))
+        # detectedRooms = roomDetector(mit_object,model_RD)
+        # del obj_tensor
         #model_RD = model_RD.cpu()
         ########
         # PATH PLANNING:
@@ -160,5 +163,16 @@ while(not(targetObjStatus)):
 
         #Get current pose for the frame
 
+with tf.device('/cpu:0'):
+    model_RD = tf.keras.models.load_model(NN_RD_DIRECTORY)
+# #Search for singular objects in the current input and return top results
+mit_object = tf.constant(convertCOCO2MIT_tensor(obj_tensor_coco,m),shape=(1,2204))
+detectedRooms,roomStr = roomDetector(mit_object,model_RD)
 
-        path_planner(MAP_PATH, targetObjStatus, detectedRooms, rooms, current_pose)
+result, n = roomGuesser(targetObj, MIT_CLASSES, model_RD)
+
+print(targetObj+ " was found in the " + roomStr)
+cv2.imwrite("result.jpg",img)
+
+
+        #path_planner(MAP_PATH, targetObjStatus, detectedRooms, rooms, current_pose)

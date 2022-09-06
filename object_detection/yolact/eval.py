@@ -1067,6 +1067,7 @@ def print_maps(all_maps):
 def setup():
     parse_args()
     set_cfg("yolact_base_config")
+    args.k_max=7
     #trained_model = SavePath.get_latest('weights/', cfg.name)
     trained_model = "./object_detection/yolact/weights/yolact_base_54_800000.pth"
     cfg.eval_mask_branch = False
