@@ -44,7 +44,7 @@ def parse_args(argv=None):
     parser.add_argument('--trained_model',
                         default='weights/ssd300_mAP_77.43_v2.pth', type=str,
                         help='Trained state_dict file path to open. If "interrupt", this will open the interrupt file.')
-    parser.add_argument('--top_k', default=5, type=int,
+    parser.add_argument('--top_k', default=7, type=int,
                         help='Further restrict the number of predictions to parse')
     parser.add_argument('--cuda', default=True, type=str2bool,
                         help='Use cuda to evaulate model')
@@ -140,8 +140,8 @@ def prep_display(dets_out, img, h, w, undo_transform=True, class_color=False, ma
     #Setup arguments that would be set in command line
     display_lincomb = True
     crop = True
-    score_threshold = 0.15
-    top_k = 4
+    score_threshold = 0.25
+    top_k = 20
     if undo_transform:
         img_numpy = undo_image_transformation(img, w, h)
         img_gpu = torch.Tensor(img_numpy).cuda()

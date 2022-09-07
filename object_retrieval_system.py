@@ -139,6 +139,11 @@ while(not(targetObjStatus)):
         if targetObj in obj_name_list:
             targetObjStatus = True
             print(f'The {targetObj} has been found!' )
+            cv2.imwrite("result.jpg",img)
+            correct = input("Has the target been correctly found? (y/n)")
+            if(correct != "y"):
+                targetObjStatus = False
+                print("Continuing to search...")
         else:
             print('Still searching for target object')
         
