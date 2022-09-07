@@ -6,63 +6,62 @@ Keyanna Coghlan
 Sami Nassif-Lachapelle  
 
 ### Overview
-This project uses deep learning models to generate semantically labelled maps of indoor spaces. 
+This project uses deep learning models to search for objects inside indoor spaces.
 
 The system consists of three main components:
-1. A object detector using version of YOLACT trained on the MIT Indoor Scenes Dataset (2019)
-2. A custom "room detector" that takes in detected objects and their position and infers the room label
-3. A custom path planner/obstacle avoidance system that generates a metric map of the environment and learns to avoid walls and obstacles
-4. Finally the output of the path planner and obstacle avoidance are combined to generate a semantically labelled map of the environment
+1. A object detector using version of YOLACT
+2. A custom "room detector" that takes in detected objects infers the room labels for the current position of the robot
+3. A filter and mappings system that better defines the boundaries of each room
+4. A path planner that creates a route to the most likely room that a desired object may be found in
 ![alt text](https://github.com/MaxPolzinCU/room-recognition/images/systemOverview.png?raw=true)
-
-
-FINISH UPDATING THE REST OF THE README:
 
 ## Setup and Usage:
 ### Setting up the Environment and Dependencies
-1. Unzip the provided file called "SemanticMapLabels.zip" OR visit https://github.com/MaxPolzinCU/SemanticMapLabels and clone the repository
-2. Install Python 3.8.5 and Pip 20.0.2 or greater
-3. Install the Intel RealSense SDK Python wrapper with the following command: "pip install pyrealsense2"
-4. Install the following libraries:
-- numpy 1.20.2
-- matplotlib 3.4.1
-- openCV 4.5.2
-5. Clone the official Darknet YOLOv3 repository found at: https://github.com/pjreddie/darknet
+1. Clone this repository
+2. Install ROS 20.04 Noetic
+3. Install Python 3.8.5 and Pip 20.0.2 or greater
+4. Install the Intel RealSense SDK Python wrapper with the following command: "pip install pyrealsense2"
+5. Install the Intel RealSense ROS wrapper
 
-Follow the instructions provided in the following link to build the library: https://pjreddie.com/darknet/yolo/
-- The MakeFile parameters used are all default except for as follows:
-    - GPU=1
-    - CUDNN=0
-    - OPENCV=1
-    - OPENMP=0
-    - DEBUG=0
-Once completed the desired weights (e.g. "yolov3-tiny.weights") should be moved into the ./model/weights folder and the compiled library "libdarknet.so" should be placed in the ./model folder. 
+## Running the system
+### Step 1: Generate a map
+1. Open a terminal and cd into the "support_scripts/ros_scripts" folder.
+2. Run: "bash run_cameras.sh" \
+This will allow the cameras to start collecting data to generate a map.   
+4. Stop the first bash script and run: "bash run_rosbag.sh && export_data.sh" \
+This will bag the data and export the pose data. Make sure the data is then stored in the relevant folders under "/dataset/" such as "images", "maps", and "poses". \
 
-Alternatly the weights provided in this repository and the compiled "libdarknet.so" can be used if this code is being run on a CUDA enabled GPU. Note this will only work on a Unix machine, as "libdarknet.so" wont run on Windows.
+### Step 2: Determine the current room
+1. Open a terminal
+2. Run: "semantic_mapping_system.py" \
+This will return the current room for each frame found in "dataset/images". The functions in "map_generation.py" are used to correlate
+each detected room for each frame to aproximate locations based on the pose data from the cameras, which is found in "dataset/poses".
 
-### Running the system
-1. Open a terminal and cd into the "SemanticMapLabels" folder.
-2. Run: "python classifierDepth.py" \
-This will generate a 2D plot representing the environment captured by the stereo camera with annotated labels of the detected objects.   
-4. Run: "python classifierWebcam2.py" \
-This will access the computers webcam, if available, and perform objection detection while also ????????
+### Step 3: Retrieve a object
+1. Open a terminal
+2: Run: "object_retrieval_system.py" \
+This will prompt you for a object label, type your desired object in the terminal (e.g. "cup"). If the object is detected in the collected images
+the frame with the object will be displayed. Another prompt will be given in the terminal, respond with yes or no to let the system know if the 
+correct object was detected. \
+Once the correct object has been found a path with be plotted using the functions in "path_planner.py" and the path will be displayed on top of the map
+that is found in "dataset/map".
 
 ## Repo Contents:
-- **classifierDepth.py**: Main script needed, allows for both object detection and mapping using the Inteal RealSense D435i stereo camera
+- **map_generation**: Folder containing .py files needed for the mapping tasks.
 
-- **classifierSingle.py**: Test object detection on a single image, feed it a input image from ./models/data
+- **object_detection**: Folder containing .py files needed for the object detection tasks. Additionally the files and weights used for YOLACT are stored in a subfolder here.
 
-- **classifierWebcam.py**: Test object detection with a webcam
+- **path_planner**: Folder containing .py files needed for the path planning tasks.
 
-- **classifierWebcam2.py**: Test object detection with a webcam, uses a structure more similar to that of the main "classifierDepth.py" script
+- **room_detection**: Folder containing .py files which define the functions needed for the room detection and estimation tasks.
 
-- **models**: Folder to contain everything related to the ML models
-    - *weights*: Folder to contain pre-trained weights for YOLOv3 Network
-        - yolov3-tiny.weights: Pre-trained wegihts
-    - *data*: Folder to contain and labels or datasets to be used
-        - dog.jpg: Test image for "classifierSingle.py"
-        - coco.names: Contains all the labels from the COCO Dataset
-    - *cfg*: Folder to contain all config files for networks used
-        - coco.data: Config paramters for COCO Dataset
-    - *libdarknet.so*: Pre-compiled Darknet library using YOLOv3 and trained on ????
+- **support_scripts**: Folder containing bash scripts used to execute ROS code to capture data as well as .py files with functions used in other parts of the system.
+
+- **dataset**: Folder containing sample data to test the system, this is also where collected data should be stored when using the system.
+
+- **models**: Folder containing everything related to the custom DL models used in this system.
+    - *data_processors*: Folder to scripts to clean and modify raw data used to train the custom ML models (e.g. convert MIT dataset to a usable format)
+    - *nn_room_detector*: Folder containing the weights and architecture of the custom room detector neural network.
+    - *trained_data*: Folder containing .pkl files relating to the datasets used to train the custom room detector, such as a list of unique objects that the detector can take as inputs.
+    - Various .ipynb notebook files used to define, train, and validate the custom DL models used in this system.
 
