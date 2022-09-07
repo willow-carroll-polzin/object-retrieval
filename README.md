@@ -13,7 +13,7 @@ The system consists of three main components:
 2. A custom "room detector" that takes in detected objects infers the room labels for the current position of the robot
 3. A filter and mappings system that better defines the boundaries of each room
 4. A path planner that creates a route to the most likely room that a desired object may be found in
-![alt text](https://github.com/MaxPolzinCU/room-recognition/images/systemOverview.png?raw=true)
+![alt text](https://github.com/MaxPolzinCU/room-recognition/blob/main/images/systemOverview.png)
 
 ## Setup and Usage:
 ### Setting up the Environment and Dependencies
